@@ -28,6 +28,7 @@ import android.view.View;
 public class MovieListActivity extends AppCompatActivity
         implements MovieListFragment.Callbacks {
 
+    public static final String API_KEY = KeyRing.getKey();
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
