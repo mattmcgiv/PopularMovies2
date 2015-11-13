@@ -1,13 +1,34 @@
 package com.antym.popularmovies2;
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.antym.popularmovies2.dummy.DummyContent;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * A list fragment representing a list of Movies. This fragment
@@ -18,7 +39,14 @@ import com.antym.popularmovies2.dummy.DummyContent;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class MovieListFragment extends ListFragment {
+public class MovieListFragment extends Fragment {
+
+    public static final String TAG = "DiscoverFragment";
+    public MovieManager movieManager = new MovieManager(getActivity());
+    public static ArrayList<String> movPosterURLStubs = new ArrayList<>();
+    public static ArrayList<String> movPosterURLs = new ArrayList<>();
+    public ImageAdapter imageAdapter = new ImageAdapter(getActivity(), movieManager);
+    public GridView gridView;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -70,24 +98,46 @@ public class MovieListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO: replace with a real list adapter.
-        setListAdapter(new ArrayAdapter<DummyContent.DummyItem>(
-                getActivity(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                DummyContent.ITEMS));
+//        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            public void onItemClick(AdapterView<?> parent, View v,
+//                                    int position, long id) {
+//                //TODO: need to pass on to detail fragment
+//                //Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+//                //intent.putExtra(MMM_ID, imageAdapter.movieManager.getMovie(position));
+//                //startActivity(intent);
+//
+//            }
+//        });
+
+
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        // Restore the previously serialized activated item position.
-        if (savedInstanceState != null
-                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
-            setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
-        }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.gridview, container, false);
     }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        new PopularMovieRetriever(getActivity()).execute();
+        gridView = (GridView) getView();
+        gridView.setAdapter(imageAdapter);
+        //this.setContentView(gridview);
+        Log.d(TAG, "In on post execute click listener.");
+    }
+
+//    @Override
+//    public void onViewCreated(View view, Bundle savedInstanceState) {
+//        super.onViewCreated(view, savedInstanceState);
+//
+//        // Restore the previously serialized activated item position.
+//        if (savedInstanceState != null
+//                && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
+//            setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
+//        }
+//    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -109,14 +159,14 @@ public class MovieListFragment extends ListFragment {
         mCallbacks = sDummyCallbacks;
     }
 
-    @Override
-    public void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
-
-        // Notify the active callbacks interface (the activity, if the
-        // fragment is attached to one) that an item has been selected.
-        mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
-    }
+//    @Override
+//    public void onListItemClick(ListView listView, View view, int position, long id) {
+//        super.onListItemClick(listView, view, position, id);
+//
+//        // Notify the active callbacks interface (the activity, if the
+//        // fragment is attached to one) that an item has been selected.
+//        mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
+//    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -127,25 +177,239 @@ public class MovieListFragment extends ListFragment {
         }
     }
 
-    /**
-     * Turns on activate-on-click mode. When this mode is on, list items will be
-     * given the 'activated' state when touched.
-     */
-    public void setActivateOnItemClick(boolean activateOnItemClick) {
-        // When setting CHOICE_MODE_SINGLE, ListView will automatically
-        // give items the 'activated' state when touched.
-        getListView().setChoiceMode(activateOnItemClick
-                ? ListView.CHOICE_MODE_SINGLE
-                : ListView.CHOICE_MODE_NONE);
-    }
+//    /**
+//     * Turns on activate-on-click mode. When this mode is on, list items will be
+//     * given the 'activated' state when touched.
+//     */
+//    public void setActivateOnItemClick(boolean activateOnItemClick) {
+//        // When setting CHOICE_MODE_SINGLE, ListView will automatically
+//        // give items the 'activated' state when touched.
+//        getListView().setChoiceMode(activateOnItemClick
+//                ? ListView.CHOICE_MODE_SINGLE
+//                : ListView.CHOICE_MODE_NONE);
+//    }
+//
+//    private void setActivatedPosition(int position) {
+//        if (position == ListView.INVALID_POSITION) {
+//            getListView().setItemChecked(mActivatedPosition, false);
+//        } else {
+//            getListView().setItemChecked(position, true);
+//        }
+//
+//        mActivatedPosition = position;
+//    }
 
-    private void setActivatedPosition(int position) {
-        if (position == ListView.INVALID_POSITION) {
-            getListView().setItemChecked(mActivatedPosition, false);
-        } else {
-            getListView().setItemChecked(position, true);
+    public class PopularMovieRetriever extends AsyncTask<Void,Void,String> {
+
+        public Activity activity;
+
+        public PopularMovieRetriever(Activity a) {
+            this.activity = a;
         }
 
-        mActivatedPosition = position;
+        protected String doInBackground(Void... voids) {
+            // These two need to be declared outside the try/catch
+            // so that they can be closed in the finally block.
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            // Will contain the raw JSON response as a string.
+            String apiResponseJsonStr = null;
+            String apiUrlBase = "api.themoviedb.org";
+            String apiVersion = "3";
+            String apiUrlVerb = "discover";
+            String apiUrlEndpoint = "movie";
+            String api_key = MovieListActivity.API_KEY;
+
+            //Optional params
+            String sort_by = "popularity.desc";
+            //https://api.themoviedb.org/3/discover/movie?api_key=API_KEY&sort_by=popularity.desc
+            try {
+                // Construct the URL for the query
+                Uri.Builder builder = new Uri.Builder();
+                builder.scheme("https")
+                        .authority(apiUrlBase)
+                        .appendPath(apiVersion)
+                        .appendPath(apiUrlVerb)
+                        .appendPath(apiUrlEndpoint)
+                        .appendQueryParameter("api_key", api_key)
+                        .appendQueryParameter("sort_by", sort_by);
+                String stringUrl = builder.build().toString();
+                Log.d(TAG, stringUrl);
+                URL url = new URL(stringUrl);
+
+                // Create the request, and open the connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    apiResponseJsonStr = null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    apiResponseJsonStr = null;
+                }
+                apiResponseJsonStr = buffer.toString();
+
+                try {
+                    int numResults = getNumResults(apiResponseJsonStr);
+                    movPosterURLStubs.clear();
+                    imageAdapter.movieManager.clear();
+                    for (int i = 0; i < numResults; i++) {
+                        //Build a list of poster paths
+                        String myPosterPath = getPosterPath(apiResponseJsonStr, i);
+                        Movie currentMovie = new Movie();
+
+                        //Set movie object's values
+                        currentMovie.setId(getValue(apiResponseJsonStr, i, "id"));
+                        currentMovie.setBackdropPath(getValue(apiResponseJsonStr, i, "backdrop_path"));
+                        //currentMovie.setBackdropUrl(currentMovie.getBackdropPath());
+                        currentMovie.setOriginalTitle(getValue(apiResponseJsonStr, i, "original_title"));
+                        currentMovie.setOverview(getValue(apiResponseJsonStr, i, "overview"));
+                        currentMovie.setReleaseDate(getValue(apiResponseJsonStr, i, "release_date"));
+                        currentMovie.setPosterPath(getValue(apiResponseJsonStr, i, "poster_path"));
+                        currentMovie.setPopularity(Double.parseDouble(getValue(apiResponseJsonStr, i, "popularity")));
+                        currentMovie.setVoteAverage(Double.parseDouble(getValue(apiResponseJsonStr, i, "vote_average")));
+                        currentMovie.setVoteCount(Integer.parseInt(getValue(apiResponseJsonStr, i, "vote_count")));
+
+                        movPosterURLStubs.add(myPosterPath);
+                        String movPostURL;
+                        movPostURL = getMoviePosterURL(myPosterPath);
+                        currentMovie.setPosterURL(movPostURL);
+                        movPosterURLs.add(movPostURL);
+
+                        //add movie object to movie manager
+                        imageAdapter.movieManager.addMovie(currentMovie);
+
+                    }
+                } catch (JSONException je){
+                    Log.e(TAG, "JSON error while trying to get poster path: " + je.getMessage());
+                }
+
+
+
+            } catch (IOException e) {
+                Log.e(TAG, "Error ", e);
+                // If the code didn't successfully get the data, there's no point in attempting
+                // to parse it.
+                apiResponseJsonStr = null;
+            } finally{
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(TAG, "Error closing stream", e);
+                    }
+                }
+            }
+            return apiResponseJsonStr;
+        }
+
+        protected void onPostExecute(String result){
+            gridView.setAdapter(imageAdapter);
+        }
+
+        protected String getPosterPath(String movieJsonString, int movieIndex) throws JSONException{
+            JSONObject movie = getMovieJSON(movieJsonString, movieIndex);
+            String posterPath = movie.getString("poster_path");
+            return posterPath;
+        }
+
+        protected String getValue(String movieJsonString, int movieIndex, String key) throws JSONException{
+            JSONObject movie = getMovieJSON(movieJsonString,movieIndex);
+            String val = movie.getString(key);
+            return val;
+        }
+
+        protected JSONObject getMovieJSON(String movieJsonString, int movieIndex) throws JSONException{
+            JSONObject results = new JSONObject(movieJsonString);
+            JSONArray movies = results.getJSONArray("results");
+            JSONObject movie = movies.getJSONObject(movieIndex);
+            return movie;
+        }
+
+        protected int getNumResults(String movieJsonString) throws JSONException {
+            JSONObject results = new JSONObject(movieJsonString);
+            JSONArray movies = results.getJSONArray("results");
+            return movies.length();
+        }
+    }
+
+    public String getMoviePosterURL(String stub) throws MalformedURLException {
+        String apiUrlBase = "image.tmdb.org";
+        String apiUrl0 = "t";
+        String apiUrl1 = "p";
+        String apiUrl2 = "w185";
+        String api_key = MovieListActivity.API_KEY;
+        String posterPath = stub;
+
+        // Construct the URL for the query
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority(apiUrlBase)
+                .appendPath(apiUrl0)
+                .appendPath(apiUrl1)
+                .appendPath(apiUrl2)
+                .appendEncodedPath(posterPath)
+                .appendQueryParameter("api_key", api_key);
+
+        String stringUrl = builder.build().toString();
+        URL url = new URL(stringUrl);
+        return url.toString();
+    }
+
+    /**
+     * Created by matthewmcgivney on 8/22/15.
+     */
+    public static class ImageAdapter extends BaseAdapter {
+        private Context mContext;
+        public static MovieManager movieManager;
+        public ImageAdapter(Context c, MovieManager m) {
+            this.mContext = c;
+            this.movieManager = m;
+        }
+
+        public int getCount() {
+            return movieManager.getNumMovies();
+        }
+
+        public Object getItem(int position) {
+            return movieManager.getMovie(position);
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        // create a new ImageView for each item referenced by the Adapter
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ImageView imageView;
+            if (convertView == null) {
+                // if it's not recycled, initialize some attributes
+                imageView = new ImageView(this.mContext);
+                imageView.setAdjustViewBounds(true);
+            } else {
+                imageView = (ImageView) convertView;
+            }
+
+            String finalURL = movieManager.getMovie(position).getPosterURL();
+            Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
+            return imageView;
+        }
     }
 }
