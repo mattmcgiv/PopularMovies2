@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -500,20 +502,20 @@ public class MovieListFragment extends Fragment {
 
         public int getCount() {
             Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
-            //return movieManager.getNumMovies();
-            return mThumbIds.length;
+            return movieManager.getNumMovies();
+            //return mThumbIds.length;
         }
 
         public Object getItem(int position) {
             Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
-            //return movieManager.getMovie(position);
-            return null;
+            return movieManager.getMovie(position);
+            //return null;
         }
 
         public long getItemId(int position) {
             Log.d(TAG, "getItemId!!! " + position);
-            //return position;
-            return 0;
+            return position;
+            //return 0;
         }
 
         // create a new ImageView for each item referenced by the Adapter
@@ -531,10 +533,10 @@ public class MovieListFragment extends Fragment {
                 imageView = (ImageView) convertView;
             }
 
-            //String finalURL = movieManager.getMovie(position).getPosterURL();
-            //Log.d(TAG, finalURL);
-            //Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
-            imageView.setImageResource(mThumbIds[position]);
+            String finalURL = movieManager.getMovie(position).getPosterURL();
+            Log.d(TAG, finalURL);
+            Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
+            //imageView.setImageResource(mThumbIds[position]);
             return imageView;
         }
 
