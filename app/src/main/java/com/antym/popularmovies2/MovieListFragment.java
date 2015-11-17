@@ -16,8 +16,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +41,7 @@ import java.util.ArrayList;
 public class MovieListFragment extends Fragment {
 
     public static final String TAG = "DiscoverFragment";
+    public static MovieManager movieManager;
     public static ArrayList<String> movPosterURLStubs = new ArrayList<>();
     public static ArrayList<String> movPosterURLs = new ArrayList<>();
     public ImageAdapter imageAdapter;
@@ -94,14 +93,13 @@ public class MovieListFragment extends Fragment {
     public MovieListFragment() {
     }
 
-    public void refreshData(ImageAdapter ia) {
+    public void refreshData(ImageAdapter2 ia) {
         Context context = getActivity();
         CharSequence text = Integer.toString(ia.getCount());
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
-        this.imageAdapter = ia;
-        this.gridView.setAdapter(this.imageAdapter);
+        this.gridView.setAdapter(ia);
         this.imageAdapter.notifyDataSetChanged();
     }
     @Override
@@ -130,8 +128,9 @@ public class MovieListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        imageAdapter = new ImageAdapter(getActivity(), new MovieManager(getActivity()));
-        new PopularMovieRetriever(getActivity()).execute();
+        movieManager = new MovieManager(getActivity());
+        imageAdapter = new ImageAdapter(getActivity(), movieManager);
+        new PopularMovieRetriever(getActivity(), imageAdapter).execute();
         this.gridView = (GridView) getView();
         if (this.gridView != null) {
             Log.d(TAG, "gridView not null");
@@ -213,19 +212,17 @@ public class MovieListFragment extends Fragment {
 //        mActivatedPosition = position;
 //    }
 
-    public class PopularMovieRetriever extends AsyncTask<Void,Void,ImageAdapter> {
+    public class PopularMovieRetriever extends AsyncTask<Void,Void,ImageAdapter2> {
 
         public Activity activity;
-        private ImageAdapter ia;
+        private ImageAdapter2 ia;
 
-        public PopularMovieRetriever(Activity a) {
+        public PopularMovieRetriever(Activity a, ImageAdapter ia) {
             this.activity = a;
-            this.ia = new ImageAdapter(this.activity,
-                    new MovieManager(new ArrayList<Movie>())
-            );
+            this.ia = new ImageAdapter2(this.activity, movieManager);
         }
 
-        protected ImageAdapter doInBackground(Void... voids) {
+        protected ImageAdapter2 doInBackground(Void... voids) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -337,7 +334,7 @@ public class MovieListFragment extends Fragment {
             return this.ia;
         }
 
-        protected void onPostExecute(ImageAdapter ia){
+        protected void onPostExecute(ImageAdapter2 ia){
             MovieListFragment listFrag = (MovieListFragment) getFragmentManager()
                     .findFragmentById(R.id.movie_list);
             if (listFrag != null) {
@@ -425,17 +422,20 @@ public class MovieListFragment extends Fragment {
 
         public int getCount() {
             Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
-            return movieManager.getNumMovies();
+            //return movieManager.getNumMovies();
+            return mThumbIds.length;
         }
 
         public Object getItem(int position) {
             Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
-            return movieManager.getMovie(position);
+            //return movieManager.getMovie(position);
+            return null;
         }
 
         public long getItemId(int position) {
             Log.d(TAG, "getItemId!!! " + position);
-            return position;
+            //return position;
+            return 0;
         }
 
         // create a new ImageView for each item referenced by the Adapter
@@ -445,14 +445,113 @@ public class MovieListFragment extends Fragment {
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(this.mContext);
-                imageView.setAdjustViewBounds(true);
+                //imageView.setAdjustViewBounds(true);
+                imageView.setLayoutParams(new GridView.LayoutParams(85,85));
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                imageView.setPadding(8,8,8,8);
             } else {
                 imageView = (ImageView) convertView;
             }
 
-            String finalURL = movieManager.getMovie(position).getPosterURL();
-            Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
+            //String finalURL = movieManager.getMovie(position).getPosterURL();
+            //Log.d(TAG, finalURL);
+            //Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
+            imageView.setImageResource(mThumbIds[position]);
             return imageView;
         }
+
+        // references to our images
+        private Integer[] mThumbIds = {
+                R.drawable.sample_2, R.drawable.sample_3,
+                R.drawable.sample_4, R.drawable.sample_5,
+                R.drawable.sample_6, R.drawable.sample_7,
+                R.drawable.sample_0, R.drawable.sample_1,
+                R.drawable.sample_2, R.drawable.sample_3,
+                R.drawable.sample_4, R.drawable.sample_5,
+                R.drawable.sample_6, R.drawable.sample_7,
+                R.drawable.sample_0, R.drawable.sample_1,
+                R.drawable.sample_2, R.drawable.sample_3,
+                R.drawable.sample_4, R.drawable.sample_5,
+                R.drawable.sample_6, R.drawable.sample_7
+        };
     }
+    public static class ImageAdapter2 extends BaseAdapter {
+        private Context mContext;
+        public MovieManager movieManager;
+        public ImageAdapter2(Context c, MovieManager m) {
+            if (c == null) {
+                Log.e(TAG, "Null context passed to ImageAdapter");
+                this.mContext = c;
+            }
+            else {
+                Log.d(TAG, "Context passed to ImageAdapter is not null");
+                this.mContext = c;
+            }
+            if (m == null) {
+                Log.e(TAG, "Null MovieManager passed to ImageAdapter");
+                this.movieManager = m;
+            }
+            else {
+                Log.d(TAG, "MovieManager passed to ImageAdapter is not null");
+                this.movieManager = m;
+            }
+
+        }
+
+        public int getCount() {
+            Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
+            //return movieManager.getNumMovies();
+            return mThumbIds.length;
+        }
+
+        public Object getItem(int position) {
+            Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
+            //return movieManager.getMovie(position);
+            return null;
+        }
+
+        public long getItemId(int position) {
+            Log.d(TAG, "getItemId!!! " + position);
+            //return position;
+            return 0;
+        }
+
+        // create a new ImageView for each item referenced by the Adapter
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Log.d(TAG, "getView!!!");
+            ImageView imageView;
+            if (convertView == null) {
+                // if it's not recycled, initialize some attributes
+                imageView = new ImageView(this.mContext);
+                //imageView.setAdjustViewBounds(true);
+                imageView.setLayoutParams(new GridView.LayoutParams(85,85));
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                imageView.setPadding(8,8,8,8);
+            } else {
+                imageView = (ImageView) convertView;
+            }
+
+            //String finalURL = movieManager.getMovie(position).getPosterURL();
+            //Log.d(TAG, finalURL);
+            //Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
+            imageView.setImageResource(mThumbIds[position]);
+            return imageView;
+        }
+
+        // references to our images
+        private Integer[] mThumbIds = {
+                R.drawable.negate_2, R.drawable.negate_3,
+                R.drawable.negate_4, R.drawable.negate_5,
+                R.drawable.negate_6, R.drawable.negate_3,
+                R.drawable.negate_0, R.drawable.negate_1,
+                R.drawable.negate_2, R.drawable.negate_3,
+                R.drawable.negate_4, R.drawable.negate_5,
+                R.drawable.negate_6, R.drawable.negate_3,
+                R.drawable.negate_0, R.drawable.negate_1,
+                R.drawable.negate_2, R.drawable.negate_3,
+                R.drawable.negate_4, R.drawable.negate_5,
+                R.drawable.negate_6, R.drawable.negate_3
+        };
+    }
+
 }
