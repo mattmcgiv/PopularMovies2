@@ -96,7 +96,7 @@ public class MovieListFragment extends Fragment {
 
     public void refreshData(ImageAdapter ia) {
         Context context = getActivity();
-        CharSequence text = ia.toString();
+        CharSequence text = Integer.toString(ia.getCount());
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
@@ -124,13 +124,13 @@ public class MovieListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.gridview, container, false);
+        return inflater.inflate(R.layout.gridview, container, true);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        imageAdapter = new ImageAdapter(getActivity(), movieManager);
+        imageAdapter = new ImageAdapter(getActivity(), new MovieManager(getActivity()));
         new PopularMovieRetriever(getActivity()).execute();
         this.gridView = (GridView) getView();
         if (this.gridView != null) {
