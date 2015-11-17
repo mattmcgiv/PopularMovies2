@@ -14,6 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -42,10 +43,9 @@ import java.util.ArrayList;
 public class MovieListFragment extends Fragment {
 
     public static final String TAG = "DiscoverFragment";
-    public MovieManager movieManager = new MovieManager(getActivity());
     public static ArrayList<String> movPosterURLStubs = new ArrayList<>();
     public static ArrayList<String> movPosterURLs = new ArrayList<>();
-    public ImageAdapter imageAdapter = new ImageAdapter(getActivity(), movieManager);
+    public ImageAdapter imageAdapter;
     public GridView gridView;
 
     /**
@@ -94,10 +94,19 @@ public class MovieListFragment extends Fragment {
     public MovieListFragment() {
     }
 
+    public void refreshData(ImageAdapter ia) {
+        Context context = getActivity();
+        CharSequence text = ia.toString();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+        this.imageAdapter = ia;
+        this.gridView.setAdapter(this.imageAdapter);
+        this.imageAdapter.notifyDataSetChanged();
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 //        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 //            public void onItemClick(AdapterView<?> parent, View v,
 //                                    int position, long id) {
@@ -121,11 +130,16 @@ public class MovieListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+//        imageAdapter = new ImageAdapter(getActivity(), movieManager);
         new PopularMovieRetriever(getActivity()).execute();
-        gridView = (GridView) getView();
-        gridView.setAdapter(imageAdapter);
-        //this.setContentView(gridview);
-        Log.d(TAG, "In on post execute click listener.");
+        this.gridView = (GridView) getView();
+        if (this.gridView != null) {
+            Log.d(TAG, "gridView not null");
+        }
+        else {
+            Log.e(TAG, "Null gridView in onActivityCreated");
+        }
+        this.gridView.setAdapter(this.imageAdapter);
     }
 
 //    @Override
@@ -199,15 +213,19 @@ public class MovieListFragment extends Fragment {
 //        mActivatedPosition = position;
 //    }
 
-    public class PopularMovieRetriever extends AsyncTask<Void,Void,String> {
+    public class PopularMovieRetriever extends AsyncTask<Void,Void,ImageAdapter> {
 
         public Activity activity;
+        private ImageAdapter ia;
 
         public PopularMovieRetriever(Activity a) {
             this.activity = a;
+            this.ia = new ImageAdapter(this.activity,
+                    new MovieManager(new ArrayList<Movie>())
+            );
         }
 
-        protected String doInBackground(Void... voids) {
+        protected ImageAdapter doInBackground(Void... voids) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -235,7 +253,6 @@ public class MovieListFragment extends Fragment {
                         .appendQueryParameter("api_key", api_key)
                         .appendQueryParameter("sort_by", sort_by);
                 String stringUrl = builder.build().toString();
-                Log.d(TAG, stringUrl);
                 URL url = new URL(stringUrl);
 
                 // Create the request, and open the connection
@@ -266,7 +283,7 @@ public class MovieListFragment extends Fragment {
                 try {
                     int numResults = getNumResults(apiResponseJsonStr);
                     movPosterURLStubs.clear();
-                    imageAdapter.movieManager.clear();
+                    this.ia.movieManager.clear();
                     for (int i = 0; i < numResults; i++) {
                         //Build a list of poster paths
                         String myPosterPath = getPosterPath(apiResponseJsonStr, i);
@@ -291,7 +308,7 @@ public class MovieListFragment extends Fragment {
                         movPosterURLs.add(movPostURL);
 
                         //add movie object to movie manager
-                        imageAdapter.movieManager.addMovie(currentMovie);
+                        this.ia.movieManager.addMovie(currentMovie);
 
                     }
                 } catch (JSONException je){
@@ -317,11 +334,18 @@ public class MovieListFragment extends Fragment {
                     }
                 }
             }
-            return apiResponseJsonStr;
+            return this.ia;
         }
 
-        protected void onPostExecute(String result){
-            gridView.setAdapter(imageAdapter);
+        protected void onPostExecute(ImageAdapter ia){
+            MovieListFragment listFrag = (MovieListFragment) getFragmentManager()
+                    .findFragmentById(R.id.movie_list);
+            if (listFrag != null) {
+                Log.d(TAG, "listFrag.refreshData(imageAdapter)");
+                listFrag.refreshData(ia);
+            } else {
+                Log.e(TAG, "listFrag.refreshData(NULL)");
+            }
         }
 
         protected String getPosterPath(String movieJsonString, int movieIndex) throws JSONException{
@@ -378,26 +402,45 @@ public class MovieListFragment extends Fragment {
      */
     public static class ImageAdapter extends BaseAdapter {
         private Context mContext;
-        public static MovieManager movieManager;
+        public MovieManager movieManager;
         public ImageAdapter(Context c, MovieManager m) {
-            this.mContext = c;
-            this.movieManager = m;
+            if (c == null) {
+                Log.e(TAG, "Null context passed to ImageAdapter");
+                this.mContext = c;
+            }
+            else {
+                Log.d(TAG, "Context passed to ImageAdapter is not null");
+                this.mContext = c;
+            }
+            if (m == null) {
+                Log.e(TAG, "Null MovieManager passed to ImageAdapter");
+                this.movieManager = m;
+            }
+            else {
+                Log.d(TAG, "MovieManager passed to ImageAdapter is not null");
+                this.movieManager = m;
+            }
+
         }
 
         public int getCount() {
+            Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
             return movieManager.getNumMovies();
         }
 
         public Object getItem(int position) {
+            Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
             return movieManager.getMovie(position);
         }
 
         public long getItemId(int position) {
+            Log.d(TAG, "getItemId!!! " + position);
             return position;
         }
 
         // create a new ImageView for each item referenced by the Adapter
         public View getView(int position, View convertView, ViewGroup parent) {
+            Log.d(TAG, "getView!!!");
             ImageView imageView;
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
