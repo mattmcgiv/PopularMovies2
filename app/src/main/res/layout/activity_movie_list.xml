@@ -1,6 +1,5 @@
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:id="@+id/movie_list"
     android:name="com.antym.popularmovies2.MovieListFragment" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp" tools:context=".MovieListActivity"
+    android:layout_height="match_parent" tools:context=".MovieListActivity"
  />

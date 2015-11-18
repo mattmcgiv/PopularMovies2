@@ -424,20 +424,20 @@ public class MovieListFragment extends Fragment {
 
         public int getCount() {
             Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
-            //return movieManager.getNumMovies();
-            return mThumbIds.length;
+            return movieManager.getNumMovies();
+//            return mThumbIds.length;
         }
 
         public Object getItem(int position) {
             Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
-            //return movieManager.getMovie(position);
-            return null;
+            return movieManager.getMovie(position);
+//            return null;
         }
 
         public long getItemId(int position) {
             Log.d(TAG, "getItemId!!! " + position);
-            //return position;
-            return 0;
+            return position;
+//            return 0;
         }
 
         // create a new ImageView for each item referenced by the Adapter
@@ -447,18 +447,18 @@ public class MovieListFragment extends Fragment {
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(this.mContext);
-                //imageView.setAdjustViewBounds(true);
-                imageView.setLayoutParams(new GridView.LayoutParams(85,85));
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(8,8,8,8);
+                imageView.setAdjustViewBounds(true);
+                //imageView.setLayoutParams(new GridView.LayoutParams(85,85));
+                //imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                //imageView.setPadding(8,8,8,8);
             } else {
                 imageView = (ImageView) convertView;
             }
 
-            //String finalURL = movieManager.getMovie(position).getPosterURL();
+            String finalURL = movieManager.getMovie(position).getPosterURL();
             //Log.d(TAG, finalURL);
-            //Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
-            imageView.setImageResource(mThumbIds[position]);
+            Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
+            //imageView.setImageResource(mThumbIds[position]);
             return imageView;
         }
 
@@ -520,23 +520,25 @@ public class MovieListFragment extends Fragment {
 
         // create a new ImageView for each item referenced by the Adapter
         public View getView(int position, View convertView, ViewGroup parent) {
-            Log.d(TAG, "getView!!!");
+            Log.d(TAG, "getView!!!2");
             ImageView imageView;
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
                 imageView = new ImageView(this.mContext);
-                //imageView.setAdjustViewBounds(true);
-                imageView.setLayoutParams(new GridView.LayoutParams(85,85));
+
+                //imageView.setLayoutParams(new GridView.LayoutParams(85,85));
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                imageView.setPadding(8,8,8,8);
+                imageView.setPadding(4, 2, 4, 2);
+
+                imageView.setAdjustViewBounds(true);
             } else {
                 imageView = (ImageView) convertView;
             }
 
             String finalURL = movieManager.getMovie(position).getPosterURL();
-            Log.d(TAG, finalURL);
+            Log.d(TAG, "Final url is: " + finalURL);
             Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
-            //imageView.setImageResource(mThumbIds[position]);
+//            imageView.setImageResource(mThumbIds[position]);
             return imageView;
         }
 
