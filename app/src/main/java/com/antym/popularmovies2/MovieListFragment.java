@@ -10,11 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -42,29 +42,12 @@ import java.util.ArrayList;
  */
 public class MovieListFragment extends Fragment {
 
-    public static final String TAG = "DiscoverFragment";
+    public static final String TAG = "MovieListFragment";
     public static MovieManager movieManager;
     public static ArrayList<String> movPosterURLStubs = new ArrayList<>();
     public static ArrayList<String> movPosterURLs = new ArrayList<>();
     public ImageAdapter imageAdapter;
     public GridView gridView;
-
-    /**
-     * The serialization (saved instance state) Bundle key representing the
-     * activated item position. Only used on tablets.
-     */
-    private static final String STATE_ACTIVATED_POSITION = "activated_position";
-
-    /**
-     * The fragment's current callback object, which is notified of list item
-     * clicks.
-     */
-    private Callbacks mCallbacks = sDummyCallbacks;
-
-    /**
-     * The current activated item position. Only used on tablets.
-     */
-    private int mActivatedPosition = ListView.INVALID_POSITION;
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -79,14 +62,33 @@ public class MovieListFragment extends Fragment {
     }
 
     /**
+     * The fragment's current callback object, which is notified of list item
+     * clicks.
+     */
+    private Callbacks mCallbacks = sDummyCallbacks;
+
+    /**
      * A dummy implementation of the {@link Callbacks} interface that does
      * nothing. Used only when this fragment is not attached to an activity.
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
         public void onItemSelected(String id) {
+            Log.d(TAG, "onItemSelected: id is: " + id);
         }
     };
+
+    /**
+     * The current activated item position. Only used on tablets.
+     */
+    private int mActivatedPosition = ListView.INVALID_POSITION;
+
+    /**
+     * The serialization (saved instance state) Bundle key representing the
+     * activated item position. Only used on tablets.
+     */
+    private static final String STATE_ACTIVATED_POSITION = "activated_position";
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -96,29 +98,13 @@ public class MovieListFragment extends Fragment {
     }
 
     public void refreshData(ImageAdapter2 ia) {
-        Context context = getActivity();
-        CharSequence text = Integer.toString(ia.getCount());
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
         this.gridView.setAdapter(ia);
         this.imageAdapter.notifyDataSetChanged();
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            public void onItemClick(AdapterView<?> parent, View v,
-//                                    int position, long id) {
-//                //TODO: need to pass on to detail fragment
-//                //Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-//                //intent.putExtra(MMM_ID, imageAdapter.movieManager.getMovie(position));
-//                //startActivity(intent);
-//
-//            }
-//        });
-
-
     }
 
     @Override
@@ -135,12 +121,24 @@ public class MovieListFragment extends Fragment {
         new PopularMovieRetriever(getActivity(), imageAdapter).execute();
         this.gridView = (GridView) getView();
         if (this.gridView != null) {
-            Log.d(TAG, "gridView not null");
         }
         else {
             Log.e(TAG, "Null gridView in onActivityCreated");
         }
         this.gridView.setAdapter(this.imageAdapter);
+        this.gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                //TODO: need to pass on to detail fragment
+
+                //Log.d(TAG, "onItemClick: id is: " + movieManager.getMovie(position));
+                mCallbacks.onItemSelected(String.valueOf(position));
+                //Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                //intent.putExtra(MMM_ID, imageAdapter.movieManager.getMovie(position));
+                //startActivity(intent);
+
+            }
+        });
     }
 
 //    @Override
@@ -340,7 +338,6 @@ public class MovieListFragment extends Fragment {
             MovieListFragment listFrag = (MovieListFragment) getFragmentManager()
                     .findFragmentById(R.id.movie_list);
             if (listFrag != null) {
-                Log.d(TAG, "listFrag.refreshData(imageAdapter)");
                 listFrag.refreshData(ia);
             } else {
                 Log.e(TAG, "listFrag.refreshData(NULL)");
@@ -408,7 +405,6 @@ public class MovieListFragment extends Fragment {
                 this.mContext = c;
             }
             else {
-                Log.d(TAG, "Context passed to ImageAdapter is not null");
                 this.mContext = c;
             }
             if (m == null) {
@@ -416,33 +412,25 @@ public class MovieListFragment extends Fragment {
                 this.movieManager = m;
             }
             else {
-                Log.d(TAG, "MovieManager passed to ImageAdapter is not null");
                 this.movieManager = m;
             }
 
         }
 
         public int getCount() {
-            Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
             return movieManager.getNumMovies();
-//            return mThumbIds.length;
         }
 
         public Object getItem(int position) {
-            Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
             return movieManager.getMovie(position);
-//            return null;
         }
 
         public long getItemId(int position) {
-            Log.d(TAG, "getItemId!!! " + position);
             return position;
-//            return 0;
         }
 
         // create a new ImageView for each item referenced by the Adapter
         public View getView(int position, View convertView, ViewGroup parent) {
-            Log.d(TAG, "getView!!!");
             ImageView imageView;
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
@@ -456,7 +444,6 @@ public class MovieListFragment extends Fragment {
             }
 
             String finalURL = movieManager.getMovie(position).getPosterURL();
-            //Log.d(TAG, finalURL);
             Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
             //imageView.setImageResource(mThumbIds[position]);
             return imageView;
@@ -486,7 +473,6 @@ public class MovieListFragment extends Fragment {
                 this.mContext = c;
             }
             else {
-                Log.d(TAG, "Context passed to ImageAdapter is not null");
                 this.mContext = c;
             }
             if (m == null) {
@@ -494,33 +480,28 @@ public class MovieListFragment extends Fragment {
                 this.movieManager = m;
             }
             else {
-                Log.d(TAG, "MovieManager passed to ImageAdapter is not null");
                 this.movieManager = m;
             }
 
         }
 
         public int getCount() {
-            Log.d(TAG, "getCount!!! " + movieManager.getNumMovies());
             return movieManager.getNumMovies();
             //return mThumbIds.length;
         }
 
         public Object getItem(int position) {
-            Log.d(TAG, "getItem!!! " + movieManager.getMovie(position));
             return movieManager.getMovie(position);
             //return null;
         }
 
         public long getItemId(int position) {
-            Log.d(TAG, "getItemId!!! " + position);
             return position;
             //return 0;
         }
 
         // create a new ImageView for each item referenced by the Adapter
         public View getView(int position, View convertView, ViewGroup parent) {
-            Log.d(TAG, "getView!!!2");
             ImageView imageView;
             if (convertView == null) {
                 // if it's not recycled, initialize some attributes
@@ -536,7 +517,6 @@ public class MovieListFragment extends Fragment {
             }
 
             String finalURL = movieManager.getMovie(position).getPosterURL();
-            Log.d(TAG, "Final url is: " + finalURL);
             Picasso.with(this.mContext).load(finalURL).resize(185,277).into(imageView);
 //            imageView.setImageResource(mThumbIds[position]);
             return imageView;
