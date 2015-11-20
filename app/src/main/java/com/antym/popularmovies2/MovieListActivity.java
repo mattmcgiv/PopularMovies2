@@ -76,14 +76,14 @@ public class MovieListActivity extends AppCompatActivity
      * indicating that the item with the given ID was selected.
      */
     @Override
-    public void onItemSelected(String id) {
+    public void onItemSelected(Movie movie) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            Log.d("MovieListActivity.java", id);
-            arguments.putString(MovieDetailFragment.ARG_ITEM_ID, id);
+            Log.d("MovieListActivity.java", movie.toString());
+            arguments.putSerializable(MovieDetailFragment.ARG_ITEM_ID, movie);
 
             MovieDetailFragment fragment = new MovieDetailFragment();
             fragment.setArguments(arguments);
@@ -95,7 +95,7 @@ public class MovieListActivity extends AppCompatActivity
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, MovieDetailActivity.class);
-            detailIntent.putExtra(MovieDetailFragment.ARG_ITEM_ID, id);
+            detailIntent.putExtra(MovieDetailFragment.ARG_ITEM_ID, movie);
             startActivity(detailIntent);
         }
     }

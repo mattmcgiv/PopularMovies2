@@ -58,7 +58,7 @@ public class MovieListFragment extends Fragment {
         /**
          * Callback for when an item has been selected.
          */
-        public void onItemSelected(String id);
+        public void onItemSelected(Movie movie);
     }
 
     /**
@@ -73,8 +73,8 @@ public class MovieListFragment extends Fragment {
      */
     private static Callbacks sDummyCallbacks = new Callbacks() {
         @Override
-        public void onItemSelected(String id) {
-            Log.d(TAG, "onItemSelected: id is: " + id);
+        public void onItemSelected(Movie movie) {
+            Log.d(TAG, "onItemSelected: movie is: " + movie);
         }
     };
 
@@ -132,7 +132,7 @@ public class MovieListFragment extends Fragment {
                 //TODO: need to pass on to detail fragment
 
                 //Log.d(TAG, "onItemClick: id is: " + movieManager.getMovie(position));
-                mCallbacks.onItemSelected(String.valueOf(position));
+                mCallbacks.onItemSelected(movieManager.getMovie(position));
                 //Intent intent = new Intent(MainActivity.this, DetailActivity.class);
                 //intent.putExtra(MMM_ID, imageAdapter.movieManager.getMovie(position));
                 //startActivity(intent);
