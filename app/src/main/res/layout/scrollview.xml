@@ -1,0 +1,122 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:id="@+id/scrollview1">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:context="com.antym.popularmoviesstage1.DetailActivity"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:id="@+id/imageMoviePoster" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="18dp"
+                android:layout_marginStart="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/h2"
+                    android:textStyle="bold|italic"
+                    android:textColor="#333"
+                    android:id="@+id/title" />
+
+                <ToggleButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:textSize="16sp"
+                    android:id="@+id/mark_as_favorite"
+                    android:textOn="@string/marked_as_favorite"
+                    android:textOff="@string/not_marked_as_favorite" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:id="@+id/textNumVotes"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="34sp"
+                    android:id="@+id/textRating"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textSize="16sp"
+                    android:text="@string/released"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:id="@+id/releaseDate" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="24dp"
+            android:textSize="@dimen/h2"
+            android:text="@string/overview"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:typeface="serif"
+            android:textSize="16sp"
+            android:id="@+id/overview" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="24dp"
+            android:textSize="@dimen/h2"
+            android:text="@string/trailers"/>
+
+        <ListView
+            android:layout_width="fill_parent"
+            android:layout_height="200dp"
+            android:id="@+id/trailer_list_view">
+        </ListView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="24dp"
+            android:textSize="@dimen/h2"
+            android:text="@string/reviews"/>
+
+        <ListView
+            android:layout_width="fill_parent"
+            android:layout_height="200dp"
+            android:id="@+id/review_list_view">
+        </ListView>
+
+    </LinearLayout>
+
+</ScrollView>

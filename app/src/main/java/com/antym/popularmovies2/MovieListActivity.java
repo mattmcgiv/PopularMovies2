@@ -6,7 +6,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 
 
@@ -82,7 +81,6 @@ public class MovieListActivity extends AppCompatActivity
             // adding or replacing the detail fragment using a
             // fragment transaction.
             Bundle arguments = new Bundle();
-            Log.d("MovieListActivity.java", movie.toString());
             arguments.putSerializable(MovieDetailFragment.ARG_ITEM_ID, movie);
 
             MovieDetailFragment fragment = new MovieDetailFragment();
