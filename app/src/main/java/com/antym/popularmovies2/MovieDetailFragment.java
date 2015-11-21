@@ -48,7 +48,7 @@ public class MovieDetailFragment extends Fragment {
             Activity activity = this.getActivity();
             CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
             if (appBarLayout != null) {
-                appBarLayout.setTitle(movie.getOriginalTitle());
+                appBarLayout.setTitle("Detail");
             }
         }
     }
@@ -70,13 +70,13 @@ public class MovieDetailFragment extends Fragment {
 
             fc = new FavoriteController(this.getActivity());
 
-            //Load movie title into textview
-            TextView title = (TextView) context.findViewById(R.id.movie_detail);
-            if (title == null) {
-                Log.e(TAG, "Title null");
-            }
-
-            title.setText(movie.getOriginalTitle());
+//            //Load movie title into textview
+//            TextView title = (TextView) context.findViewById(R.id.movie_detail);
+//            if (title == null) {
+//                Log.e(TAG, "Title null");
+//            }
+//
+//            title.setText(movie.getOriginalTitle());
 
             //Assign button to variable
             final ToggleButton button = (ToggleButton) context.findViewById(R.id.mark_as_favorite);
@@ -120,9 +120,13 @@ public class MovieDetailFragment extends Fragment {
                 Log.e(TAG, "Null getActivity");
             }
 
+            String posterUrl = movie.getPosterURL();
+
+            ImageView iv = (ImageView) context.findViewById(R.id.imageMoviePoster);
+
             Picasso.with(getActivity())
-                    .load(movie.getPosterURL())
-                    .into((ImageView) context.findViewById(R.id.imageMoviePoster));
+                    .load(posterUrl)
+                    .into(iv);
 
             //Load vote average
             TextView rating = (TextView) context.findViewById(R.id.textRating);
