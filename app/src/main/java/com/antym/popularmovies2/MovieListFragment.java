@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +50,11 @@ public class MovieListFragment extends Fragment {
     public static ArrayList<String> movPosterURLs = new ArrayList<>();
     public ImageAdapter imageAdapter;
     public GridView gridView;
+    public enum SortOrder {
+        POPULARITY, RATING, FAVORITES
+    }
+
+    static SortOrder sort = SortOrder.POPULARITY;
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -139,6 +146,27 @@ public class MovieListFragment extends Fragment {
 
             }
         });
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (sort == SortOrder.POPULARITY) {
+                    Log.d("SORT", "Popularity");
+                    sort = SortOrder.RATING;
+                } else if (sort == SortOrder.RATING) {
+                    Log.d("SORT", "Rating");
+                    sort = SortOrder.FAVORITES;
+                } else if (sort == SortOrder.FAVORITES) {
+                    Log.d("SORT", "Favorites");
+                    sort = SortOrder.POPULARITY;
+                }
+                Snackbar.make(view, "Resorting by: " + sort, Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
+
+                //TODO:: this is next...filter by favorites
+                new PopularMovieRetriever(getActivity(), imageAdapter).execute();
+            }
+        });
     }
 
 //    @Override
@@ -228,6 +256,7 @@ public class MovieListFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
+            //TODO add the sort order here
             // Will contain the raw JSON response as a string.
             String apiResponseJsonStr = null;
             String apiUrlBase = "api.themoviedb.org";
@@ -237,7 +266,23 @@ public class MovieListFragment extends Fragment {
             String api_key = MovieListActivity.API_KEY;
 
             //Optional params
-            String sort_by = "popularity.desc";
+            String sort_by;
+            String voteMinimum = "1";
+
+            if (sort == SortOrder.POPULARITY) {
+                sort_by = "popularity.desc";
+            }
+            else if (sort == SortOrder.RATING) {
+                sort_by = "vote_average.desc";
+                //require at least 1000 votes to keep
+                //obscure movies out of results
+                voteMinimum = "1000";
+            }
+            //TODO update this
+            else {
+                sort_by = "vote_average.asc";
+            }
+
             //https://api.themoviedb.org/3/discover/movie?api_key=API_KEY&sort_by=popularity.desc
             try {
                 // Construct the URL for the query
@@ -248,7 +293,8 @@ public class MovieListFragment extends Fragment {
                         .appendPath(apiUrlVerb)
                         .appendPath(apiUrlEndpoint)
                         .appendQueryParameter("api_key", api_key)
-                        .appendQueryParameter("sort_by", sort_by);
+                        .appendQueryParameter("sort_by", sort_by)
+                        .appendQueryParameter("vote_count.gte",voteMinimum);
                 String stringUrl = builder.build().toString();
                 URL url = new URL(stringUrl);
 

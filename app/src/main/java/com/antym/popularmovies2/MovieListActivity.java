@@ -2,11 +2,8 @@ package com.antym.popularmovies2;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 
 
 /**
@@ -29,6 +26,7 @@ public class MovieListActivity extends AppCompatActivity
         implements MovieListFragment.Callbacks {
 
     public static final String API_KEY = KeyRing.getKey();
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -43,15 +41,6 @@ public class MovieListActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Resorting by: ", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-            }
-        });
 
         if (findViewById(R.id.movie_detail_container) != null) {
             // The detail container view will be present only in the
