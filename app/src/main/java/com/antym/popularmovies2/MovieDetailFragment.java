@@ -6,16 +6,17 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.squareup.picasso.Picasso;
@@ -64,10 +65,10 @@ public class MovieDetailFragment extends Fragment {
             this.movie = (Movie) getArguments().getSerializable(ARG_ITEM_ID);
 
             Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle("Detail");
-            }
+           // CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
+//            if (appBarLayout != null) {
+//                appBarLayout.setTitle("Detail");
+//            }
         }
     }
 
@@ -101,37 +102,37 @@ public class MovieDetailFragment extends Fragment {
 
             isFav = fc.isFavorite(movie.getId());
 
-//            if (isFav) {
-//                button.setChecked(true);
-//            }
-//            else {
-//                button.setChecked(false);
-//            }
+            if (isFav) {
+                button.setChecked(true);
+            }
+            else {
+                button.setChecked(false);
+            }
 
-//            button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-//                    //Toast "toggling favorite: on/off"
-//                    Context context = context;
-//                    CharSequence text = movie.getId();
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    if (isChecked) {
-//                        // The toggle is enabled
-//                        //set favorite
-//                        fc.setFavorite(movie.getId());
-//                        button.setChecked(true);
-//                        text = "Set favorite";
-//                        Toast.makeText(context, text, duration).show();
-//                    } else {
-//                        // The toggle is disabled
-//                        //unset favorite
-//                        fc.unSetFavorite(movie.getId());
-//                        button.setChecked(false);
-//                        text = "Unset favorite";
-//                        Toast.makeText(context, text, duration).show();
-//                    }
-//                }
-//            });
+            button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+                    //Toast "toggling favorite: on/off"
+                    Context context = getActivity();
+                    CharSequence text = movie.getId();
+                    int duration = Toast.LENGTH_SHORT;
+
+                    if (isChecked) {
+                        // The toggle is enabled
+                        //set favorite
+                        fc.setFavorite(movie.getId());
+                        button.setChecked(true);
+                        text = "Set favorite";
+                        Toast.makeText(context, text, duration).show();
+                    } else {
+                        // The toggle is disabled
+                        //unset favorite
+                        fc.unSetFavorite(movie.getId());
+                        button.setChecked(false);
+                        text = "Unset favorite";
+                        Toast.makeText(context, text, duration).show();
+                    }
+                }
+            });
 
             //Load movie poster into imageview
             if (getActivity() == null) {
@@ -459,16 +460,6 @@ public class MovieDetailFragment extends Fragment {
             ListView listView = (ListView) getActivity().findViewById(R.id.review_list_view);
             listView.setAdapter(adapter);
 
-            //TODO: make app scroll to top after this update
-//            final ScrollView main = (ScrollView) findViewById(R.id.scrollview1);
-//            main.post(new Runnable() {
-//                public void run() {
-//                    main.scrollTo(0, 0);
-//                }
-//            });
         }
     }
-
-
-
 }

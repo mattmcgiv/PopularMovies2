@@ -11,10 +11,8 @@ android:orientation="vertical"
 android:layout_width="match_parent"
 android:layout_height="wrap_content"
 tools:context=".MovieDetailFragment"
-android:layout_marginTop="8dp"
-android:layout_marginBottom="1dp"
-android:layout_marginLeft="18dp"
-android:layout_marginRight="18dp">
+android:padding="16dp"
+    android:paddingBottom="100dp">
 
 <LinearLayout
     android:orientation="horizontal"
@@ -78,45 +76,50 @@ android:layout_marginRight="18dp">
     </LinearLayout>
 </LinearLayout>
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:textSize="@dimen/h2"
-    android:text="@string/overview"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textSize="@dimen/h2"
+        android:text="@string/overview"/>
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="24dp"
-    android:typeface="serif"
-    android:textSize="16sp"
-    android:id="@+id/overview" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:typeface="serif"
+        android:textSize="16sp"
+        android:id="@+id/overview" />
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:textSize="@dimen/h2"
-    android:text="@string/trailers"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textSize="@dimen/h2"
+        android:text="@string/trailers"/>
 
-<ListView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/trailer_list_view">
-</ListView>
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/trailer_list_view">
+    </ListView>
 
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="24dp"
-    android:textSize="@dimen/h2"
-    android:text="@string/reviews"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textSize="@dimen/h2"
+        android:text="@string/reviews"/>
 
-<ListView
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/review_list_view">
-</ListView>
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="32dp"
+        android:id="@+id/review_list_view">
+    </ListView>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>
