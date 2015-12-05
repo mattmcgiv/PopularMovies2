@@ -285,7 +285,7 @@ public class MovieDetailFragment extends Fragment {
         }
 
         protected void onPostExecute(com.antym.popularmovies2.MovieTrailers mt) {
-            final com.antym.popularmovies2.MovieTrailers mts = mt;
+            com.antym.popularmovies2.MovieTrailers mts = mt;
             TrailerAdapter adapter = new TrailerAdapter(this.context,
                     R.layout.trailer_title, mt);
             ListView listView = (ListView) getActivity().findViewById(R.id.trailer_list_view);
@@ -293,8 +293,8 @@ public class MovieDetailFragment extends Fragment {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    ArrayList<com.antym.popularmovies2.MovieTrailer> al = mts.getTrailers();
-                    launchYoutubeTrailer(al.get(position).get_youtube_id());
+                    //ArrayList<com.antym.popularmovies2.MovieTrailer> al = mts.getTrailers();
+                    //launchYoutubeTrailer(al.get(position).get_youtube_id());
                 }
             });
         }

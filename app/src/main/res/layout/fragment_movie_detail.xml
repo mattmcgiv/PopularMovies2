@@ -101,6 +101,7 @@ android:padding="16dp"
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="32dp"
         android:id="@+id/trailer_list_view">
     </ListView>
 

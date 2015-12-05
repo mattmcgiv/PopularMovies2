@@ -22,7 +22,7 @@ public class MovieManager {
         this.myMovies = myMovies;
     }
 
-    private static final String TAG = "PopularMovies1";
+    private static final String TAG = "PopularMovies2";
 
     protected ArrayList<com.antym.popularmovies2.Movie> myMovies = new ArrayList<>();
 
@@ -104,7 +104,7 @@ public class MovieManager {
     public ArrayList<Movie> getFavorites() {
         FavoriteController fc = new FavoriteController(this.context);
         ArrayList<String> movieIds = fc.getAllFavorites();
-        Log.e(TAG,"favorites movieIds are: " + movieIds.toString());
+        Log.d(TAG,"favorites movieIds are: " + movieIds.toString());
         ArrayList<Movie> movies = new ArrayList<Movie>();
         for (String id:movieIds) {
             movies.add(this.getMovieById(id));
