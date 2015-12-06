@@ -45,14 +45,11 @@ public class MovieDetailFragment extends Fragment {
     private static final String TAG = "MovieDetailFragment";
     private boolean isFav;
     private FavoriteController fc;
+    public static MovieTrailers mts = new MovieTrailers();
 
 
     public MovieDetailFragment() {
     }
-
-    /*public MovieDetailFragment(Movie movie) {
-        this.movie = movie;
-    }*/
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,10 +62,6 @@ public class MovieDetailFragment extends Fragment {
             this.movie = (Movie) getArguments().getSerializable(ARG_ITEM_ID);
 
             Activity activity = this.getActivity();
-           // CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-//            if (appBarLayout != null) {
-//                appBarLayout.setTitle("Detail");
-//            }
         }
     }
 
@@ -89,13 +82,13 @@ public class MovieDetailFragment extends Fragment {
 
             fc = new FavoriteController(this.getActivity());
 
-//            //Load movie title into textview
-//            TextView title = (TextView) context.findViewById(R.id.movie_detail);
-//            if (title == null) {
-//                Log.e(TAG, "Title null");
-//            }
-//
-//            title.setText(movie.getOriginalTitle());
+            //Load movie title into textview
+            TextView title = (TextView) context.findViewById(R.id.title);
+            if (title == null) {
+                Log.e(TAG, "Title null");
+            }
+
+            title.setText(movie.getOriginalTitle());
 
             //Assign button to variable
             final ToggleButton button = (ToggleButton) context.findViewById(R.id.mark_as_favorite);
@@ -285,7 +278,7 @@ public class MovieDetailFragment extends Fragment {
         }
 
         protected void onPostExecute(com.antym.popularmovies2.MovieTrailers mt) {
-            com.antym.popularmovies2.MovieTrailers mts = mt;
+            mts = mt;
             TrailerAdapter adapter = new TrailerAdapter(this.context,
                     R.layout.trailer_title, mt);
             ListView listView = (ListView) getActivity().findViewById(R.id.trailer_list_view);
@@ -293,8 +286,8 @@ public class MovieDetailFragment extends Fragment {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //ArrayList<com.antym.popularmovies2.MovieTrailer> al = mts.getTrailers();
-                    //launchYoutubeTrailer(al.get(position).get_youtube_id());
+                    ArrayList<com.antym.popularmovies2.MovieTrailer> al = mts.getTrailers();
+                    launchYoutubeTrailer(al.get(position).get_youtube_id());
                 }
             });
         }
@@ -386,12 +379,10 @@ public class MovieDetailFragment extends Fragment {
                 }
                 result = buffer.toString();
                 try {
-                    //TODO:remove debug
                     Log.d(TAG, "Reviews returned " + this.getNumResults(result) + " results."
                             + "\nThey were: " + result);
                     for (int i = 0; i < this.getNumResults(result); i++) {
                         JSONObject jo = getTrailerJSON(result, i);
-                        //TODO this needs to be specific to reviews (not trailers)
 
                         Review review = getReviewFromJson(jo);
                         Log.d(TAG, "Review created:: author:'" + review.getAuthor()

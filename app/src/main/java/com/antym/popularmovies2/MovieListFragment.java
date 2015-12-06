@@ -20,14 +20,11 @@ import android.widget.ListView;
 
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,6 +43,7 @@ public class MovieListFragment extends Fragment {
 
     public static final String TAG = "MovieListFragment";
     public static MovieManager movieManager;
+    public static MovieManager favorites;
     public static ArrayList<String> movPosterURLStubs = new ArrayList<>();
     public static ArrayList<String> movPosterURLs = new ArrayList<>();
     public ImageAdapter imageAdapter;
@@ -126,7 +124,8 @@ public class MovieListFragment extends Fragment {
         movieManager = new MovieManager(getActivity());
         imageAdapter = new ImageAdapter(getActivity(), movieManager);
         new PopularMovieRetriever(getActivity(), imageAdapter).execute();
-        new FavoriteMovieRetriever(getActivity(), imageAdapter).execute();
+        //TODO implement this
+        //new FavoriteMovieRetriever(getActivity(), imageAdapter).execute();
         this.gridView = (GridView) getView();
         if (this.gridView != null) {
         }
@@ -241,135 +240,6 @@ public class MovieListFragment extends Fragment {
 //        mActivatedPosition = position;
 //    }
 
-    public class FavoriteMovieRetriever extends AsyncTask<Void,Void,ImageAdapter2> {
-        public Activity activity;
-        private ImageAdapter2 ia;
-
-        public FavoriteMovieRetriever(Activity a, ImageAdapter ia) {
-            this.activity = a;
-            this.ia = new ImageAdapter2(this.activity, movieManager);
-        }
-
-        protected ImageAdapter2 doInBackground(Void... voids) {
-            FavoriteController fc = new FavoriteController(this.activity);
-            ArrayList<String> favList = fc.getAllFavorites();
-
-            for (int i = 0; i < favList.size(); i++) {
-                //query API
-                // These two need to be declared outside the try/catch
-                // so that they can be closed in the finally block.
-                HttpURLConnection urlConnection = null;
-                BufferedReader reader = null;
-
-                // Will contain the raw JSON response as a string.
-                //https://api.themoviedb.org/3/movie/{{id}}?api_key={{your_key}}
-                String apiResponseJsonStr = null;
-                String apiUrlBase = "api.themoviedb.org";
-                String apiVersion = "3";
-                String apiUrlEndpoint = "movie";
-                String apiMovieId = favList.get(i);
-                String api_key = MovieListActivity.API_KEY;
-
-                try {
-                    // Construct the URL for the query
-                    Uri.Builder builder = new Uri.Builder();
-                    builder.scheme("https")
-                            .authority(apiUrlBase)
-                            .appendPath(apiVersion)
-                            .appendPath(apiUrlEndpoint)
-                            .appendPath(apiMovieId)
-                            .appendQueryParameter("api_key", api_key);
-                    String stringUrl = builder.build().toString();
-                    Log.d(TAG, stringUrl);
-                    URL url = new URL(stringUrl);
-
-                    // Create the request, and open the connection
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.connect();
-
-                    //parse response as Movie object
-                    InputStream inputStream = urlConnection.getInputStream();
-                    StringBuffer buffer = new StringBuffer();
-                    if (inputStream == null) {
-                        // Nothing to do.
-                        apiResponseJsonStr = null;
-                    }
-                    reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        buffer.append(line + "\n");
-                    }
-
-                    if (buffer.length() == 0) {
-                        // Stream was empty.  No point in parsing.
-                        apiResponseJsonStr = null;
-                    }
-                    apiResponseJsonStr = buffer.toString();
-                    Log.d(TAG, apiResponseJsonStr);
-                    try {
-                        movPosterURLStubs.clear();
-                        this.ia.movieManager.clear();
-//                        for (int i = 0; i < numResults; i++) {
-                        //Build a list of poster paths
-                        String myPosterPath = getPosterPath(apiResponseJsonStr, i);
-                        Movie currentMovie = new Movie();
-
-                        //Set movie object's values
-                        currentMovie.setId(getValue(apiResponseJsonStr, i, "id"));
-                        currentMovie.setBackdropPath(getValue(apiResponseJsonStr, i, "backdrop_path"));
-                        //currentMovie.setBackdropUrl(currentMovie.getBackdropPath());
-                        currentMovie.setOriginalTitle(getValue(apiResponseJsonStr, i, "original_title"));
-                        currentMovie.setOverview(getValue(apiResponseJsonStr, i, "overview"));
-                        currentMovie.setReleaseDate(getValue(apiResponseJsonStr, i, "release_date"));
-                        currentMovie.setPosterPath(getValue(apiResponseJsonStr, i, "poster_path"));
-                        currentMovie.setPopularity(Double.parseDouble(getValue(apiResponseJsonStr, i, "popularity")));
-                        currentMovie.setVoteAverage(Double.parseDouble(getValue(apiResponseJsonStr, i, "vote_average")));
-                        currentMovie.setVoteCount(Integer.parseInt(getValue(apiResponseJsonStr, i, "vote_count")));
-
-                        movPosterURLStubs.add(myPosterPath);
-                        String movPostURL;
-                        movPostURL = getMoviePosterURL(myPosterPath);
-                        currentMovie.setPosterURL(movPostURL);
-                        movPosterURLs.add(movPostURL);
-
-                        //add movie object to movie manager
-                        this.ia.movieManager.addMovie(currentMovie);
-
-//                        }
-                    } catch (JSONException je){
-                        Log.e(TAG, "JSON error while trying to get poster path: " + je.getMessage());
-                    }
-
-
-
-                } catch (IOException e) {
-                    Log.e(TAG, "Error ", e);
-                    // If the code didn't successfully get the data, there's no point in attempting
-                    // to parse it.
-                    apiResponseJsonStr = null;
-                } finally{
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (final IOException e) {
-                            Log.e(TAG, "Error closing stream", e);
-                        }
-                    }
-                }
-                return this.ia;
-
-                //add Movie to static movie manager
-            }
-
-            return this.ia;
-        }
-    }
-
     public class PopularMovieRetriever extends AsyncTask<Void,Void,ImageAdapter2> {
 
         public Activity activity;
@@ -383,12 +253,13 @@ public class MovieListFragment extends Fragment {
         protected ImageAdapter2 doInBackground(Void... voids) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
+            String apiResponseJsonStr;
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
             //TODO add the sort order here
             // Will contain the raw JSON response as a string.
-            String apiResponseJsonStr = null;
+
             String apiUrlBase = "api.themoviedb.org";
             String apiVersion = "3";
             String apiUrlVerb = "discover";
@@ -408,9 +279,21 @@ public class MovieListFragment extends Fragment {
                 //obscure movies out of results
                 voteMinimum = "1000";
             }
-            //TODO update this
+            //TODO if neither of the above sorts are applicable,
+            //then it leaves us with the "favorites" sort,
+            //so return the favorites image adapter here instead
+            //of sorting by this dummy data.
             else {
-                sort_by = "vote_average.asc";
+                sort_by = "favs";
+                MovieListFragment listFrag = (MovieListFragment) getFragmentManager()
+                        .findFragmentById(R.id.movie_list);
+                if (listFrag != null) {
+                    listFrag.showFavorites();
+                    this.ia.movieManager.clear();
+                    return this.ia;
+                } else {
+                    Log.e(TAG, "listFrag.showFavorites(NULL)");
+                }
             }
 
             //https://api.themoviedb.org/3/discover/movie?api_key=API_KEY&sort_by=popularity.desc
@@ -425,54 +308,37 @@ public class MovieListFragment extends Fragment {
                         .appendQueryParameter("api_key", api_key)
                         .appendQueryParameter("sort_by", sort_by)
                         .appendQueryParameter("vote_count.gte",voteMinimum);
-                String stringUrl = builder.build().toString();
-                URL url = new URL(stringUrl);
+                //start here for new function
+                //pass in Uri.Builder builder
 
-                // Create the request, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    apiResponseJsonStr = null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    apiResponseJsonStr = null;
-                }
-                apiResponseJsonStr = buffer.toString();
-
+                apiResponseJsonStr = TheMovieDbApiUtils.query(builder);
                 try {
-                    int numResults = getNumResults(apiResponseJsonStr);
+                    int numResults = TheMovieDbApiUtils.getNumResults(apiResponseJsonStr);
                     movPosterURLStubs.clear();
                     this.ia.movieManager.clear();
+                    ArrayList<JSONObject> movieJsons = new ArrayList<>(numResults);
                     for (int i = 0; i < numResults; i++) {
+                        //first, break up the API response into component JSON movie objects
+                        movieJsons.add(i,TheMovieDbApiUtils.getMovieJSON(apiResponseJsonStr,i));
+                    }
+                    for (int i = 0; i < numResults; i++) {
+                        //then, do the calls for each movie JSON
+                        JSONObject movieJson = movieJsons.get(i);
                         //Build a list of poster paths
-                        String myPosterPath = getPosterPath(apiResponseJsonStr, i);
+                        String myPosterPath = TheMovieDbApiUtils.getPosterPath(movieJson);
                         Movie currentMovie = new Movie();
 
                         //Set movie object's values
-                        currentMovie.setId(getValue(apiResponseJsonStr, i, "id"));
-                        currentMovie.setBackdropPath(getValue(apiResponseJsonStr, i, "backdrop_path"));
+                        currentMovie.setId(TheMovieDbApiUtils.getValue(movieJson, "id"));
+                        currentMovie.setBackdropPath(TheMovieDbApiUtils.getValue(movieJson, "backdrop_path"));
                         //currentMovie.setBackdropUrl(currentMovie.getBackdropPath());
-                        currentMovie.setOriginalTitle(getValue(apiResponseJsonStr, i, "original_title"));
-                        currentMovie.setOverview(getValue(apiResponseJsonStr, i, "overview"));
-                        currentMovie.setReleaseDate(getValue(apiResponseJsonStr, i, "release_date"));
-                        currentMovie.setPosterPath(getValue(apiResponseJsonStr, i, "poster_path"));
-                        currentMovie.setPopularity(Double.parseDouble(getValue(apiResponseJsonStr, i, "popularity")));
-                        currentMovie.setVoteAverage(Double.parseDouble(getValue(apiResponseJsonStr, i, "vote_average")));
-                        currentMovie.setVoteCount(Integer.parseInt(getValue(apiResponseJsonStr, i, "vote_count")));
+                        currentMovie.setOriginalTitle(TheMovieDbApiUtils.getValue(movieJson, "original_title"));
+                        currentMovie.setOverview(TheMovieDbApiUtils.getValue(movieJson, "overview"));
+                        currentMovie.setReleaseDate(TheMovieDbApiUtils.getValue(movieJson, "release_date"));
+                        currentMovie.setPosterPath(TheMovieDbApiUtils.getValue(movieJson, "poster_path"));
+                        currentMovie.setPopularity(Double.parseDouble(TheMovieDbApiUtils.getValue(movieJson, "popularity")));
+                        currentMovie.setVoteAverage(Double.parseDouble(TheMovieDbApiUtils.getValue(movieJson, "vote_average")));
+                        currentMovie.setVoteCount(Integer.parseInt(TheMovieDbApiUtils.getValue(movieJson, "vote_count")));
 
                         movPosterURLStubs.add(myPosterPath);
                         String movPostURL;
@@ -482,10 +348,10 @@ public class MovieListFragment extends Fragment {
 
                         //add movie object to movie manager
                         this.ia.movieManager.addMovie(currentMovie);
-
                     }
+
                 } catch (JSONException je){
-                    Log.e(TAG, "JSON error while trying to get poster path: " + je.getMessage());
+                    Log.e(TAG, "JSON error while trying to get poster path: " + je.getMessage(), je);
                 }
 
 
@@ -520,29 +386,128 @@ public class MovieListFragment extends Fragment {
             }
         }
 
-        protected String getPosterPath(String movieJsonString, int movieIndex) throws JSONException{
-            JSONObject movie = getMovieJSON(movieJsonString, movieIndex);
-            String posterPath = movie.getString("poster_path");
-            return posterPath;
+    }
+
+    private void showFavorites() {
+        new FavoriteMovieRetriever(getActivity(), imageAdapter).execute();
+    }
+
+    public class FavoriteMovieRetriever extends AsyncTask<Void,Void,ImageAdapter2> {
+        public Activity activity;
+        private ImageAdapter2 ia;
+
+        public FavoriteMovieRetriever(Activity a, ImageAdapter ia) {
+            this.activity = a;
+            this.ia = new ImageAdapter2(this.activity, movieManager);
+            favorites = new MovieManager(this.activity);
         }
 
-        protected String getValue(String movieJsonString, int movieIndex, String key) throws JSONException{
-            JSONObject movie = getMovieJSON(movieJsonString,movieIndex);
-            String val = movie.getString(key);
-            return val;
+        protected ImageAdapter2 doInBackground(Void... voids) {
+            // These two need to be declared outside the try/catch
+            // so that they can be closed in the finally block.
+            String apiResponseJsonStr;
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            //get all favorite ids
+            FavoriteController fc = new FavoriteController(getActivity());
+            ArrayList<String> favs = fc.getAllFavorites();
+
+            String domain = "api.themoviedb.org";
+            String apiVersion = "3";
+            String apiUrlEndpoint = "movie";
+            String api_key = MovieListActivity.API_KEY;
+
+            //https://api.themoviedb.org/3/discover/movie?api_key=API_KEY&sort_by=popularity.desc
+            try {
+                Log.d(TAG, "favs size: " + favs.size());
+                //https://api.themoviedb.org/3/movie/{{ID}}?api_key={{KEY}}
+                ArrayList<JSONObject> movieJsons = new ArrayList<>(favs.size());
+                for (int i = 0; i < favs.size(); i++) {
+                    //for each favorite, create a movie object
+                    String id = favs.get(i);
+                    Uri.Builder builder = new Uri.Builder();
+                    builder.scheme("https")
+                            .authority(domain)
+                            .appendPath(apiVersion)
+                            .appendPath(apiUrlEndpoint)
+                            .appendPath(id)
+                            .appendQueryParameter("api_key", api_key);
+                    apiResponseJsonStr = TheMovieDbApiUtils.query(builder);
+                    Log.d(TAG, "Favorite #" + i + ": " + apiResponseJsonStr);
+                    try {
+                        movieJsons.add(i, new JSONObject(apiResponseJsonStr));
+                    } catch (JSONException je) {
+                        Log.e(TAG, "JSON Exception: " + je.getMessage());
+                    }
+                }
+
+                try {
+                    for (int i = 0; i < favs.size(); i++) {
+                        //then, do the calls for each movie JSON
+                        Log.d(TAG, "i: " + Integer.toString(i));
+                        JSONObject movieJson = movieJsons.get(i);
+                        //Build a list of poster paths
+                        String myPosterPath = TheMovieDbApiUtils.getPosterPath(movieJson);
+                        Movie currentMovie = new Movie();
+
+                        //Set movie object's values
+                        currentMovie.setId(TheMovieDbApiUtils.getValue(movieJson, "id"));
+                        currentMovie.setBackdropPath(TheMovieDbApiUtils.getValue(movieJson, "backdrop_path"));
+                        currentMovie.setOriginalTitle(TheMovieDbApiUtils.getValue(movieJson, "original_title"));
+                        currentMovie.setOverview(TheMovieDbApiUtils.getValue(movieJson, "overview"));
+                        currentMovie.setReleaseDate(TheMovieDbApiUtils.getValue(movieJson, "release_date"));
+                        currentMovie.setPosterPath(TheMovieDbApiUtils.getValue(movieJson, "poster_path"));
+                        currentMovie.setPopularity(Double.parseDouble(TheMovieDbApiUtils.getValue(movieJson, "popularity")));
+                        currentMovie.setVoteAverage(Double.parseDouble(TheMovieDbApiUtils.getValue(movieJson, "vote_average")));
+                        currentMovie.setVoteCount(Integer.parseInt(TheMovieDbApiUtils.getValue(movieJson, "vote_count")));
+
+                        movPosterURLStubs.add(myPosterPath);
+                        String movPostURL;
+                        movPostURL = getMoviePosterURL(myPosterPath);
+                        currentMovie.setPosterURL(movPostURL);
+                        movPosterURLs.add(movPostURL);
+
+                        //add movie object to movie manager
+                        this.ia.movieManager.addMovie(currentMovie);
+                        favorites.addMovie(currentMovie);
+                    }
+                    Log.d(TAG, favorites.toString());
+
+                } catch (Exception e){
+                    Log.e(TAG, "JSON error while trying to get poster path: " + e.getMessage(), e);
+                }
+
+
+
+            } catch (IOException e) {
+                Log.e(TAG, "Error ", e);
+                // If the code didn't successfully get the data, there's no point in attempting
+                // to parse it.
+                apiResponseJsonStr = null;
+            } finally{
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(TAG, "Error closing stream", e);
+                    }
+                }
+            }
+            return this.ia;
         }
 
-        protected JSONObject getMovieJSON(String movieJsonString, int movieIndex) throws JSONException{
-            JSONObject results = new JSONObject(movieJsonString);
-            JSONArray movies = results.getJSONArray("results");
-            JSONObject movie = movies.getJSONObject(movieIndex);
-            return movie;
-        }
-
-        protected int getNumResults(String movieJsonString) throws JSONException {
-            JSONObject results = new JSONObject(movieJsonString);
-            JSONArray movies = results.getJSONArray("results");
-            return movies.length();
+        protected void onPostExecute(ImageAdapter2 ia){
+            MovieListFragment listFrag = (MovieListFragment) getFragmentManager()
+                    .findFragmentById(R.id.movie_list);
+            if (listFrag != null) {
+                listFrag.refreshData(ia);
+            } else {
+                Log.e(TAG, "listFrag.refreshData(NULL)");
+            }
         }
     }
 

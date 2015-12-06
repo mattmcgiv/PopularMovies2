@@ -119,7 +119,7 @@ public class MovieManager {
         String result = "";
         for (int i = 0; i < this.myMovies.size(); i++) {
             Movie temp = getMovie(i);
-            result += temp.getOriginalTitle() + ":" + temp.getVoteAverage() +", ";
+            result += temp.getOriginalTitle() + "::";
         }
         return result;
     }
